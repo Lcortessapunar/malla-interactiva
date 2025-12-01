@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Malla Curricular Interactiva</title>
+  <style>
+    :root{
+      --aqua:#7fffd4;
+      --aqua-dark:#009b77;
+      --locked:#cccccc;
+      --bg:#f7f9fb;
+      --card:#ffffff;
+      --accent:#333;
+    }
+    body{font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);margin:0;padding:28px;color:var(--accent);}
+    h1{margin:0 0 18px;font-size:22px}
+    .wrap{display:flex;flex-wrap:wrap;gap:12px}
+    .semester{
+      background:var(--card);
+      border-radius:12px;
+      padding:14px;
+      width:260px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .semester h3{margin:0 0 10px;font-size:16px}
+    .course{
+      background:var(--aqua);
+      border-radius:8px;
+      padding:9px 10px;
+      margin:8px 0;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s, box-shadow .12s, opacity .12s;
+      font-size:14px;
+    }
+    .course:hover{transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,0.06)}
+    .course.approved{
+      background:var(--aqua-dark);
+      color:#fff;
+      text-decoration:line-through;
+      opacity:0.95;
+    }
+    .course.locked{
+      background:var(--locked);
+      color:#666;
+      cursor:not-allowed;
+      opacity:0.9;
+      text-decoration:none;
+      transform:none;
+      box-shadow:none;
+    }
+
+    .controls{margin:18px 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    button{padding:8px 10px;border-radius:8px;border:0;cursor:pointer;background:#2b6cff;color:#fff}
+    button.ghost{background:#efefef;color:#222}
+    .legend{display:flex;gap:10px;align-items:center;font-size:13px;margin-top:8px}
+    .legend span{display:inline-flex;align-items:center;gap:8px}
+    .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+    footer{margin-top:20px;font-size:13px;color:#555}
+  </style>
+</head>
+<body>
+  <h1>Malla Curricular Interactiva — Modo Real</h1>
+
+  <div class="controls">
+    <button id="resetBtn" class="ghost">🔁 Resetear Progreso</button>
+    <button id="exportBtn">📥 Exportar Progreso (JSON)</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw" style="background:var(--aqua)"></i> No aprobado</span>
+    <span><i class="sw" style="background:var(--aqua-dark)"></i> Aprobado</span>
+    <span><i class="sw" style="background:var(--locked)"></i> Bloqueado</span>
+  </div>
+
+  <div id="malla" class="wrap" style="margin-top:16px"></div>
+
+  <footer>
+    Malla generada automáticamente según tu documento original.
+  </footer>
+
+  <script>
+    const data = [
+      {
+        semestre: "1° Año - 1° Semestre",
+        cursos: [
+          { nombre: "Anatomía & Morfología", prereq: [] },
+          { nombre: "Procesos Biológicos", prereq: [] },
+          { nombre: "Bioestadística I", prereq: [] },
+          { nombre: "Introducción a la Enfermería", prereq: [] },
+          { nombre: "Ciencias Sociales de la Salud", prereq: [] },
+          { nombre: "Inglés I", prereq: [] }
+        ]
+      },
+
+      {
+        semestre: "1° Año - 2° Semestre",
+        cursos: [
+          { nombre: "Fisiología", prereq: ["Anatomía & Morfología","Procesos Biológicos"] },
+          { nombre: "Fundamentos de Enfermería", prereq: ["Introducción a la Enfermería"] },
+          { nombre: "Seguridad Social & Sistemas de Salud", prereq: ["Ciencias Sociales de la Salud"] },
+          { nombre: "Bioestadística II", prereq: ["Bioestadística I"] },
+          { nombre: "Módulo Integrador I", prereq: [] },
+          { nombre: "Inglés II", prereq: ["Inglés I"] }
+        ]
+      },
+
+      {
+        semestre: "2° Año - 3° Semestre",
+        cursos: [
+          { nombre: "Cuidados de Enfermería en Salud Materno, Infantil & Adolescente", prereq: ["Fundamentos de Enfermería"] },
+          { nombre: "Educación para la Salud", prereq: ["Seguridad Social & Sistemas de Salud"] },
+          { nombre: "Microbiología & Parasitología", prereq: ["Procesos Biológicos"] },
+          { nombre: "Fisiopatología General", prereq: ["Fisiología"] },
+          { nombre: "Ética & Responsabilidad Social en Enfermería", prereq: [] },
+          { nombre: "Epidemiología", prereq: ["Seguridad Social & Sistemas de Salud","Bioestadística II"] },
+          { nombre: "Inglés III", prereq: ["Inglés II"] }
+        ]
+      },
+
+      {
+        semestre: "2° Año - 4° Semestre",
+        cursos: [
+          {
+            nombre: "Cuidados de Enfermería en Salud del Adulto & Persona Mayor",
+            prereq: [
+              "Cuidados de Enfermería en Salud Materno, Infantil & Adolescente",
+              "Fisiopatología General",
+              "Ética & Responsabilidad Social en Enfermería"
+            ]
+          },
+          { nombre: "Enfermería & Autocuidado en Salud Mental", prereq: ["Educación para la Salud"] },
+          { nombre: "Bases Farmacológicas en Enfermería", prereq: ["Microbiología & Parasitología"] },
+          { nombre: "Módulo Integrador II", prereq: ["Módulo Integrador I"] },
+          { nombre: "Diagnóstico Participativo en Salud", prereq: ["Epidemiología"] },
+          { nombre: "Comunicación Oral & Escrita", prereq: [] }
+        ]
+      },
+
+      {
+        semestre: "3° Año - 5° Semestre",
+        cursos: [
+          {
+            nombre: "Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor I",
+            prereq: [
+              "Cuidados de Enfermería en Salud del Adulto & Persona Mayor",
+              "Bases Farmacológicas en Enfermería",
+              "Módulo Integrador II"
+            ]
+          },
+          { nombre: "Enfermería en Salud Mental & Psiquiatría", prereq: ["Enfermería & Autocuidado en Salud Mental"] },
+          { nombre: "Gestión en Enfermería I", prereq: ["Diagnóstico Participativo en Salud"] },
+          { nombre: "Investigación Cualitativa", prereq: ["Bioestadística II"] },
+          { nombre: "Formación General Electiva", prereq: [] }
+        ]
+      },
+
+      {
+        semestre: "3° Año - 6° Semestre",
+        cursos: [
+          { nombre: "Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor II", prereq: ["Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor I"] },
+          { nombre: "Módulo Integrado de Enfermería en Salud Familiar & Comunitaria I", prereq: ["Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor I"] },
+          { nombre: "Seguridad & Calidad de los Cuidados", prereq: ["Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor I"] },
+          { nombre: "Gestión en Enfermería II", prereq: ["Gestión en Enfermería I"] },
+          { nombre: "Investigación Cuantitativa", prereq: ["Investigación Cualitativa"] }
+        ]
+      },
+
+      {
+        semestre: "4° Año - 7° Semestre",
+        cursos: [
+          { nombre: "Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I", prereq: ["Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor II"] },
+          { nombre: "Módulo Integrado de Enfermería en Salud Familiar & Comunitaria II", prereq: ["Módulo Integrado de Enfermería en Salud Familiar & Comunitaria I"] },
+          { nombre: "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I", prereq: ["Módulo Integrado de Enfermería en Salud del Adulto & Persona Mayor II"] },
+          { nombre: "Seminario de Investigación I", prereq: ["Investigación Cuantitativa"] }
+        ]
+      },
+
+      {
+        semestre: "4° Año - 8° Semestre",
+        cursos: [
+          { nombre: "Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente II", prereq: ["Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I"] },
+          { nombre: "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres II", prereq: ["Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I"] },
+          { nombre: "Seminario de Investigación II", prereq: ["Seminario de Investigación I"] },
+          { nombre: "Antropología Cristiana", prereq: [] }
+        ]
+      },
+
+      {
+        semestre: "5° Año - 9°/10° Semestres",
+        cursos: [
+          { nombre: "Internado Rural Interdisciplinario", prereq: ["Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I", "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I", "Seminario de Investigación I"] },
+          { nombre: "Internado Profesional Nivel Primario Urbano", prereq: ["Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I", "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I", "Seminario de Investigación I"] },
+          { nombre: "Internado Profesional Nivel Secundario & Terciario de Atención", prereq: ["Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I", "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I", "Seminario de Investigación I"] },
+          { nombre: "Profundización en Enfermería", prereq: ["Módulo Integrado de Enfermería en Salud Materno, Infantil & Adolescente I", "Módulo Integrado de Enfermería en Urgencias, Emergencias & Desastres I", "Seminario de Investigación I"] }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = 'malla_aprobados_v1';
+    let aprobados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    function isUnlocked(course){
+      if(!course.prereq || course.prereq.length===0) return true;
+      return course.prereq.every(p => aprobados.includes(p));
+    }
+
+    function renderMalla(){
+      const container = document.getElementById('malla');
+      container.innerHTML = '';
+      data.forEach(sem => {
+        const box=document.createElement('div');
+        box.className='semester';
+        box.innerHTML=`<h3>${sem.semestre}</h3>`;
+        sem.cursos.forEach(c=>{
+          const el=document.createElement('div');
+          el.className='course';
+          el.textContent=c.nombre;
+
+          if(aprobados.includes(c.nombre)){
+            el.classList.add('approved');
+          } else if(!isUnlocked(c)){
+            el.classList.add('locked');
+            el.title='Prerrequisitos: '+c.prereq.join(", ");
+          }
+
+          el.onclick=()=>{
+            if(el.classList.contains('locked')) return;
+            if(aprobados.includes(c.nombre)){
+              aprobados = aprobados.filter(x=>x!==c.nombre);
+            } else {
+              aprobados.push(c.nombre);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(aprobados));
+            renderMalla();
+          };
+
+          box.appendChild(el);
+        });
+        container.appendChild(box);
+      });
+    }
+
+    document.getElementById('resetBtn').onclick=()=>{
+      if(confirm("¿Resetear progreso?")){
+        aprobados=[];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(aprobados));
+        renderMalla();
+      }
+    };
+
+    document.getElementById('exportBtn').onclick=()=>{
+      const blob=new Blob([JSON.stringify(aprobados,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='progreso_malla.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    renderMalla();
+  </script>
+</body>
+</html>
